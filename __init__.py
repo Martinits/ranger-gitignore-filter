@@ -13,17 +13,21 @@ from subprocess import getstatusoutput
 
 ACCEPT_FILE_OLD = ranger.container.directory.accept_file
 
+cache = {}
+
 # Define a new one
 def gitignore_filter(fobj, filters):
     sts = fobj.fm.settings
     if sts.vcs_aware and sts.vcs_backend_git == 'enabled' and not sts.show_hidden:
         dirname, filename = os.path.split(fobj.path)
-        cmd = f'cd {dirname}; git ls-files -z --others --directory --ignored --exclude-standard'
-        retcode, ignored_files = getstatusoutput(cmd)
-        if retcode != 0:
-            return ACCEPT_FILE_OLD(fobj, filters)
-        ignored_files = [ os.path.normpath(f) for f in ignored_files.split('\0')[:-1] ]
-        if filename in ignored_files:
+        if dirname not in cache:
+            cmd = f'cd {dirname}; git ls-files -z --others --directory --ignored --exclude-standard'
+            retcode, ignored_files = getstatusoutput(cmd)
+            if retcode != 0:
+                cache[dirname] = []
+            else:
+                cache[dirname] = [ os.path.normpath(f) for f in ignored_files.split('\0')[:-1] ]
+        if filename in cache[dirname]:
             return False
     return ACCEPT_FILE_OLD(fobj, filters)
 
