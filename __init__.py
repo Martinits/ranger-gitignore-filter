@@ -1,10 +1,3 @@
-# Compatible since ranger 1.7.0 (git commit c82a8a76989c)
-#
-# This plugin hides the directories "/boot", "/sbin", "/proc" and "/sys" unless
-# the "show_hidden" option is activated.
-
-# Save the original filter function
-
 from __future__ import (absolute_import, division, print_function)
 
 import ranger.container.directory
